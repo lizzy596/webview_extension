@@ -8,6 +8,18 @@ import { EXTENSION_CONSTANT } from "constant";
 import { LeftPanelWebview } from "providers/left-webview-provider";
 
 export function activate(context: vscode.ExtensionContext) {
+
+	// This logs to the Debug console. Added it to show you how to log from here
+	vscode.window.onDidOpenTerminal((terminal) => {
+		console.log("Terminal opened. Total count: " + (<any>vscode.window).terminals.length);
+	});
+
+	// This creates an info popup, I just addded it to show you how to log from here
+	vscode.window.onDidOpenTerminal((terminal: vscode.Terminal) => {
+		vscode.window.showInformationMessage(`onDidOpenTerminal, name: ${terminal.name}`);
+	});
+
+	
 	let helloWorldCommand = vscode.commands.registerCommand(
 		"vscode-webview-extension-with-react.helloWorld",
 		() => {
