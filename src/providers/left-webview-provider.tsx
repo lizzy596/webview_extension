@@ -61,6 +61,15 @@ export class LeftPanelWebview implements WebviewViewProvider {
 				}
 
 				case "GET_SERIAL_PORT_LIST": {
+					ocflasher
+						.writeParameter(
+							"oc-flasher.serialPorts",
+							[],
+							vscode.ConfigurationTarget.Workspace
+						)
+						.then((res) => {
+							console.log("RES: ", res);
+						});
 					SerialPort.shared()
 						.list()
 						.then((ports) => {
@@ -174,7 +183,7 @@ export class LeftPanelWebview implements WebviewViewProvider {
                     ${ReactDOMServer.renderToString(
 						<LeftPanel
 							message={
-								"Tutorial for Left Panel Webview in VSCode extension"
+								"OC-Flasher: Select the serial ports to flash"
 							}
 							serialPorts={this.data?.length > 0 ? this.data : []}
 						></LeftPanel>
