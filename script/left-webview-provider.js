@@ -10,9 +10,9 @@
     });
     document.getElementById(ELEMENT_IDS.GET_SERIAL_PORTS_BUTTON).addEventListener('click', async () => {
         vscode.postMessage({
-            action: POST_MESSAGE_ACTION.OPEN_NEW_TERMINAL,
+            action: POST_MESSAGE_ACTION.GET_SERIAL_PORT_LIST,
             data: {
-                message: "You just opened a terminal Colleen"
+                message: "Get Serial ports"
             }
         });
     });

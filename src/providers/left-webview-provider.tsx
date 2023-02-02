@@ -5,10 +5,12 @@ import {
 	Uri,
 	EventEmitter,
 	window,
+	workspace,
 } from "vscode";
 import { Utils } from "utils";
 import LeftPanel from "components/LeftPanel";
 import * as ReactDOMServer from "react-dom/server";
+import { SerialPort } from "../serial/serialPort";
 
 export class LeftPanelWebview implements WebviewViewProvider {
 	constructor(
@@ -50,6 +52,16 @@ export class LeftPanelWebview implements WebviewViewProvider {
 						hideFromUser: false,
 					});
 					terminal.show();
+					break;
+				}
+
+				case "GET_SERIAL_PORT_LIST": {
+					SerialPort.shared()
+						.list()
+						.then((ports) => {
+							this.data = ports;
+							this.refresh(this.data);
+						});
 					break;
 				}
 				default:
@@ -111,6 +123,7 @@ export class LeftPanelWebview implements WebviewViewProvider {
 							message={
 								"Tutorial for Left Panel Webview in VSCode extension"
 							}
+							serialPorts={this.data?.length > 0 ? this.data : []}
 						></LeftPanel>
 					)}
 					<script nonce="${nonce}" type="text/javascript" src="${constantUri}"></script>
