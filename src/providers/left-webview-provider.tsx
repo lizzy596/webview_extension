@@ -1,6 +1,13 @@
-import { WebviewViewProvider, WebviewView, Webview, Uri, EventEmitter, window} from "vscode";
+import {
+	WebviewViewProvider,
+	WebviewView,
+	Webview,
+	Uri,
+	EventEmitter,
+	window,
+} from "vscode";
 import { Utils } from "utils";
-import LeftPanel from 'components/LeftPanel';
+import LeftPanel from "components/LeftPanel";
 import * as ReactDOMServer from "react-dom/server";
 
 export class LeftPanelWebview implements WebviewViewProvider {
@@ -9,12 +16,13 @@ export class LeftPanelWebview implements WebviewViewProvider {
 		private data: any,
 		private _view: any = null
 	) {}
-    private onDidChangeTreeData: EventEmitter<any | undefined | null | void> = new EventEmitter<any | undefined | null | void>();
+	private onDidChangeTreeData: EventEmitter<any | undefined | null | void> =
+		new EventEmitter<any | undefined | null | void>();
 
-    refresh(context: any): void {
-        this.onDidChangeTreeData.fire(null);
-        this._view.webview.html = this._getHtmlForWebview(this._view?.webview);
-    }
+	refresh(context: any): void {
+		this.onDidChangeTreeData.fire(null);
+		this._view.webview.html = this._getHtmlForWebview(this._view?.webview);
+	}
 
 	//called when a view first becomes visible
 	resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
@@ -29,10 +37,21 @@ export class LeftPanelWebview implements WebviewViewProvider {
 
 	private activateMessageListener() {
 		this._view.webview.onDidReceiveMessage((message) => {
-			switch (message.action){
-				case 'SHOW_WARNING_LOG':
+			switch (message.action) {
+				case "SHOW_WARNING_LOG": {
 					window.showWarningMessage(message.data.message);
 					break;
+				}
+
+				case "OPEN_NEW_TERMINAL": {
+					window.showWarningMessage(message.data.message);
+					const terminal = window.createTerminal({
+						name: "This is your new terminal",
+						hideFromUser: false,
+					});
+					terminal.show();
+					break;
+				}
 				default:
 					break;
 			}
@@ -43,14 +62,22 @@ export class LeftPanelWebview implements WebviewViewProvider {
 		// Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
 		// Script to handle user action
 		const scriptUri = webview.asWebviewUri(
-			Uri.joinPath(this.extensionPath, "script", "left-webview-provider.js")
+			Uri.joinPath(
+				this.extensionPath,
+				"script",
+				"left-webview-provider.js"
+			)
 		);
 		const constantUri = webview.asWebviewUri(
 			Uri.joinPath(this.extensionPath, "script", "constant.js")
 		);
 		// CSS file to handle styling
 		const styleUri = webview.asWebviewUri(
-			Uri.joinPath(this.extensionPath, "script", "left-webview-provider.css")
+			Uri.joinPath(
+				this.extensionPath,
+				"script",
+				"left-webview-provider.css"
+			)
 		);
 
 		//vscode-icon file from codicon lib
@@ -79,12 +106,13 @@ export class LeftPanelWebview implements WebviewViewProvider {
 
                 </head>
                 <body>
-                    ${
-                        
-                        ReactDOMServer.renderToString((
-							<LeftPanel message={"Tutorial for Left Panel Webview in VSCode extension"}></LeftPanel>
-						))
-                    }
+                    ${ReactDOMServer.renderToString(
+						<LeftPanel
+							message={
+								"Tutorial for Left Panel Webview in VSCode extension"
+							}
+						></LeftPanel>
+					)}
 					<script nonce="${nonce}" type="text/javascript" src="${constantUri}"></script>
 					<script nonce="${nonce}" src="${scriptUri}"></script>
 				</body>
