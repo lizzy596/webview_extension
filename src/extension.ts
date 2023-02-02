@@ -7,14 +7,19 @@ import * as vscode from "vscode";
 import { EXTENSION_CONSTANT } from "constant";
 import { LeftPanelWebview } from "providers/left-webview-provider";
 import * as ocflasher from './extConfiguration';
+import { ESP } from "./config";
+import { kill } from "process";
+import { flashCommand } from "./flash/uartFlash";
 
 let workspaceRoot: vscode.Uri;
+
+let monitorTerminal: vscode.Terminal;
 
 export function activate(context: vscode.ExtensionContext) {
 
 	workspaceRoot = vscode.workspace.workspaceFolders[0].uri;
 
-	ocflasher.writeParameter("oc-flasher.serialPorts", [], vscode.ConfigurationTarget.Workspace).then((res) => {console.log("RES: ", res);});
+	ocflasher.writeParameter("oc-flasher.serialPorts", [], vscode.ConfigurationTarget.Workspace);
 
 	vscode.workspace.onDidChangeConfiguration(async (e) => {
 		if(e.affectsConfiguration("oc-flasher")) {
@@ -32,6 +37,16 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage(`onDidOpenTerminal, name: ${terminal.name}`);
 	});
 
+	vscode.window.onDidCloseTerminal(async (terminal: vscode.Terminal) => {
+    const terminalPid = await terminal.processId;
+    const monitorTerminalPid = monitorTerminal
+      ? await monitorTerminal.processId
+      : -1;
+    if (monitorTerminalPid === terminalPid) {
+      monitorTerminal = undefined;
+      kill(monitorTerminalPid, "SIGKILL");
+    }
+  });
 	
 	let helloWorldCommand = vscode.commands.registerCommand(
 		"vscode-webview-extension-with-react.helloWorld",
@@ -42,6 +57,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 	context.subscriptions.push(helloWorldCommand);
+
+	let flashUart = vscode.commands.registerCommand("oc-flasher.flashUart", () =>
+	  flash(false)
+  );
+	context.subscriptions.push(flashUart);
 
 	// Register view
 	const leftPanelWebViewProvider = new LeftPanelWebview(context?.extensionUri, {});
@@ -54,7 +74,68 @@ export function activate(context: vscode.ExtensionContext) {
 };
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+	console.log("deactivate");
+}
+
+const flash = async (
+  encryptPartition: boolean = false,
+) => {
+    await vscode.window.withProgress(
+      {
+        cancellable: true,
+        location: vscode.ProgressLocation.Notification,
+        title: "Flashing Project",
+      },
+      async (
+        progress: vscode.Progress<{ message: string; increment: number }>,
+        cancelToken: vscode.CancellationToken
+      ) => {
+        
+        await startFlashing(cancelToken, ESP.FlashType.UART, encryptPartition);
+      }
+    );
+};
+
+async function startFlashing(
+  cancelToken: vscode.CancellationToken,
+  flashType: ESP.FlashType,
+  encryptPartitions: boolean
+) {
+  if (!flashType) {
+    flashType = ESP.FlashType.UART;
+  }
+
+  const port = ocflasher.readParameter("idf.port", workspaceRoot);
+  
+	const flashBaudRate = ocflasher.readParameter(
+    "idf.flashBaudRate",
+    workspaceRoot
+  );
+  if (monitorTerminal) {
+    monitorTerminal.sendText(ESP.CTRL_RBRACKET);
+  }
+  // const canFlash = await verifyCanFlash(flashBaudRate, port, workspaceRoot);
+  // if (!canFlash) {
+  //   return;
+  // }
+
+    const idfPathDir = ocflasher.readParameter(
+      "idf.espIdfPath",
+      workspaceRoot
+    ) as string;
+
+
+    return await flashCommand(
+      cancelToken,
+      flashBaudRate,
+      idfPathDir,
+      port,
+      workspaceRoot,
+      flashType,
+      encryptPartitions
+    );
+}
 
 // function createStatusBarItem(
 //   icon: string,

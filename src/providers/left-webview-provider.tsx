@@ -61,15 +61,11 @@ export class LeftPanelWebview implements WebviewViewProvider {
 				}
 
 				case "GET_SERIAL_PORT_LIST": {
-					ocflasher
-						.writeParameter(
-							"oc-flasher.serialPorts",
-							[],
-							vscode.ConfigurationTarget.Workspace
-						)
-						.then((res) => {
-							console.log("RES: ", res);
-						});
+					ocflasher.writeParameter(
+						"oc-flasher.serialPorts",
+						[],
+						vscode.ConfigurationTarget.Workspace
+					);
 					SerialPort.shared()
 						.list()
 						.then((ports) => {
@@ -85,15 +81,11 @@ export class LeftPanelWebview implements WebviewViewProvider {
 						workspaceRoot
 					) as Array<string>;
 					ports.push(message.data.message);
-					ocflasher
-						.writeParameter(
-							"oc-flasher.serialPorts",
-							ports,
-							vscode.ConfigurationTarget.Workspace
-						)
-						.then((res) => {
-							console.log("RES: ", res);
-						});
+					ocflasher.writeParameter(
+						"oc-flasher.serialPorts",
+						ports,
+						vscode.ConfigurationTarget.Workspace
+					);
 					break;
 				}
 
@@ -105,15 +97,11 @@ export class LeftPanelWebview implements WebviewViewProvider {
 					const updatedPorts = ports.filter(
 						(port) => port !== message.data.message
 					);
-					ocflasher
-						.writeParameter(
-							"oc-flasher.serialPorts",
-							updatedPorts,
-							vscode.ConfigurationTarget.Workspace
-						)
-						.then((res) => {
-							console.log("RES: ", res);
-						});
+					ocflasher.writeParameter(
+						"oc-flasher.serialPorts",
+						updatedPorts,
+						vscode.ConfigurationTarget.Workspace
+					);
 					break;
 				}
 
@@ -123,7 +111,12 @@ export class LeftPanelWebview implements WebviewViewProvider {
 						workspaceRoot
 					) as Array<string>;
 
-					console.log("Flash", ports);
+					const board = ocflasher.readParameter(
+						"idf.adapterTargetName",
+						workspaceRoot
+					) as string;
+
+					console.log("Flash", ports, board);
 					break;
 				}
 				default:
