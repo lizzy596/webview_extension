@@ -5,12 +5,15 @@ import {
 	Uri,
 	EventEmitter,
 	window,
-	workspace,
 } from "vscode";
+import * as vscode from "vscode";
 import { Utils } from "utils";
 import LeftPanel from "components/LeftPanel";
 import * as ReactDOMServer from "react-dom/server";
 import { SerialPort } from "../serial/serialPort";
+import * as ocflasher from "../extConfiguration";
+
+let workspaceRoot: vscode.Uri;
 
 export class LeftPanelWebview implements WebviewViewProvider {
 	constructor(
@@ -39,6 +42,8 @@ export class LeftPanelWebview implements WebviewViewProvider {
 
 	private activateMessageListener() {
 		this._view.webview.onDidReceiveMessage((message) => {
+			workspaceRoot = vscode.workspace.workspaceFolders[0].uri;
+
 			switch (message.action) {
 				case "SHOW_WARNING_LOG": {
 					window.showWarningMessage(message.data.message);
@@ -62,6 +67,54 @@ export class LeftPanelWebview implements WebviewViewProvider {
 							this.data = ports;
 							this.refresh(this.data);
 						});
+					break;
+				}
+
+				case "ADD_PORT_TO_FLASH_LIST": {
+					const ports = ocflasher.readParameter(
+						"oc-flasher.serialPorts",
+						workspaceRoot
+					) as Array<string>;
+					ports.push(message.data.message);
+					ocflasher
+						.writeParameter(
+							"oc-flasher.serialPorts",
+							ports,
+							vscode.ConfigurationTarget.Workspace
+						)
+						.then((res) => {
+							console.log("RES: ", res);
+						});
+					break;
+				}
+
+				case "REMOVE_PORT_FROM_FLASH_LIST": {
+					const ports = ocflasher.readParameter(
+						"oc-flasher.serialPorts",
+						workspaceRoot
+					) as Array<string>;
+					const updatedPorts = ports.filter(
+						(port) => port !== message.data.message
+					);
+					ocflasher
+						.writeParameter(
+							"oc-flasher.serialPorts",
+							updatedPorts,
+							vscode.ConfigurationTarget.Workspace
+						)
+						.then((res) => {
+							console.log("RES: ", res);
+						});
+					break;
+				}
+
+				case "FLASH_SERIAL_PORT_LIST": {
+					const ports = ocflasher.readParameter(
+						"oc-flasher.serialPorts",
+						workspaceRoot
+					) as Array<string>;
+
+					console.log("Flash", ports);
 					break;
 				}
 				default:

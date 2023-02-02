@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import Button from "components/Button";
 import GetSerialPortsButton from "components/GetSerialPortsButton";
+import FlashPortsButton from "components/FlashPortsButton";
 import SerialPortOption from "components/SerialPortOption";
 import ExpressButton from "./ExpressButton";
 
@@ -10,7 +11,6 @@ interface LeftPanelProp {
 }
 
 function LeftPanel({ message, serialPorts = [] }: LeftPanelProp) {
-	console.log("serialPorts", serialPorts);
 	return (
 		<div className="panel-wrapper">
 			<span className="panel-info">{message}</span>
@@ -21,6 +21,7 @@ function LeftPanel({ message, serialPorts = [] }: LeftPanelProp) {
 					<SerialPortOption key={port} serialPort={port} />
 				))}
 			</ul>
+			<FlashPortsButton />
 		</div>
 	);
 }

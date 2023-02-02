@@ -1,6 +1,17 @@
+import * as vscode from "vscode";
 import * as childProcess from "child_process";
 import * as path from "path";
 import { EOL } from "os";
+import { ESP } from "./config";
+
+export let extensionContext: vscode.ExtensionContext;
+
+export function setExtensionContext(context: vscode.ExtensionContext): void {
+  extensionContext = context;
+}
+
+export const packageJson = vscode.extensions.getExtension(ESP.extensionID)
+  .packageJSON;
 
 function getNonce() {
     let text = '';

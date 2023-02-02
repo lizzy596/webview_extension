@@ -1,36 +1,42 @@
 {
-	"name": "vscode-webview-extension-with-react",
-	"displayName": "vscode-webview-extension-with-react",
-	"description": "Example of create webview",
-	"publisher": "HuyQLuong",
+	"name": "oc-flasher",
+	"displayName": "oc-flasher",
+	"description": "Obe & Colleen ESP32 Flasher",
+	"publisher": "obe711",
 	"version": "0.0.2",
+	"license": "Apache-2.0",
 	"engines": {
-		"vscode": "^1.64.0"
+		"vscode": "^1.32.0"
 	},
 	"categories": [
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-webview-extension-with-react.helloWorld",
+		"onCommand:oc-flasher.helloWorld",
+		"onCommand:oc-flasher.createVsCodeFolder",
 		"onView:left-panel-webview",
-		"onTerminalProfile:vscode-webview-extension-with-react.terminal-profile"
+		"onTerminalProfile:oc-flasher.terminal-profile"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vscode-webview-extension-with-react.helloWorld",
+				"command": "oc-flasher.helloWorld",
 				"title": "Hello World"
 			},
 			{
-				"command": "vscode-webview-extension-with-react.createTerminal",
+				"command": "oc-flasher.createTerminal",
 				"title": "Create Terminal"
+			},
+			{
+				"command": "oc-flasher.createVsCodeFolder",
+				"title": "%oc-flasher.createVsCodeFolder.title%"
 			}
 		],
 		"terminal": {
 			"profiles": [
 				{
-					"id": "vscode-webview-extension-with-react.terminal-profile",
+					"id": "oc-flasher.terminal-profile",
 					"icon": "terminal",
 					"title": "Terminal Profile"
 				}
@@ -40,7 +46,7 @@
 			"activitybar": [
 				{
 					"id": "webview",
-					"title": "Example for webview",
+					"title": "OC Flasher",
 					"icon": "./assets/extension-icon.png"
 				}
 			]
@@ -54,7 +60,23 @@
 					"icon": "src/assets/extension-icon.png"
 				}
 			]
-		}
+		},
+		"configuration": [
+			{
+				"title": "%configuration.title%",
+				"properties": {
+					"oc-flasher.serialPorts": {
+						"type": "array",
+						"default": [
+							"/dev/cu.SLAB_USBtoUART",
+							"/dev/cu.usbserial-834201"
+						],
+						"description": "%param.serialPortsList%",
+						"scope": "resource"
+					}
+				}
+			}
+		]
 	},
 	"scripts": {
 		"compile": "npm run tsc -p ./",
